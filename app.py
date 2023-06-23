@@ -1,8 +1,9 @@
 import streamlit as st
 import openai
 import re
+import os
 
-openai.api_key = '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'
+openai.api_key = os.getenv('OPENAI_API_KEY')
 
 rule = """
 You are acting as a prompt generator and optimizer for an AI image generator. 
