@@ -2,6 +2,11 @@ import streamlit as st
 import openai
 import re
 import os
+import requests
+import json
+from PIL import Image
+from io import BytesIO
+import time
 
 openai.api_key = os.getenv('OPENAI_API_KEY')
 
@@ -65,6 +70,43 @@ def parent2child_prompt(init_prompt, prompt_A, prompt_B, n):
     prompt_list = [prompt.strip() for prompt in prompt_list if prompt]
     return prompt_list
 
+@st.cache_data
+def imagine(prompt):
+  headers = {
+  'Authorization': 'Bearer 06d35037-5aab-474c-8ab0-e9e734875afa',
+  'Content-Type': 'application/json'
+  }
+
+  url = "https://api.thenextleg.io/v2/imagine"
+
+  payload_image = json.dumps({
+  "msg": prompt,
+  "ref": "",
+  "webhookOverride": "", 
+  "ignorePrefilter": "false"
+  })
+
+  response_image = requests.request("POST", url, headers=headers, data=payload_image)
+  messageId = response_image.json().get('messageId')
+
+  url = f"https://api.thenextleg.io/v2/message/{messageId}?expireMins=2"
+  
+  def check_task_status():
+    while True:
+      response_result = requests.request("GET", url, headers=headers)
+      if response_result.status_code == 200:
+        json_response = json.loads(response_result.text)
+        progress = json_response['progress']
+        if progress == 100:
+          return json_response["response"]['imageUrl']
+      else:
+        print(f"Request failed, status code: {response_result.status_code}")
+      time.sleep(3)
+
+  if messageId:
+    img_url = check_task_status()
+    return img_url
+
 def main():
 
     if 'all_prompt_lists' not in st.session_state:
@@ -82,7 +124,10 @@ def main():
     if 'choices' not in st.session_state:
         st.session_state['choices'] = [None] * 1000
 
-    st.title("GenArtOptimizer:dna:")
+    if 'img_cache' not in st.session_state:
+        st.session_state['img_cache'] = {}
+
+    st.title("Genjourney:dna:")
 
     st.session_state['init_prompt'] = st.text_input("**Enter your initial prompt**")
     if st.button("**Generate prompts**", key="init_list_button"):
@@ -91,13 +136,22 @@ def main():
     if st.session_state['all_prompt_lists'][0] is not None:
         st.write("**Initial generated prompts:**")
         for i in range(5):
-            st.write(i + 1, st.session_state['all_prompt_lists'][0][i])
+            prompt = st.session_state['all_prompt_lists'][0][i]
+            st.write(i + 1, prompt)
+
+            img = st.session_state['img_cache'].get(prompt)
+            if img is None:
+                img = imagine(prompt)
+                st.session_state['img_cache'][prompt] = img
+            st.image(img, use_column_width=True)
 
         for i in range(st.session_state['count']):
             container = st.container()
             prompt_list = st.session_state['all_prompt_lists'][i]
-            selected_prompts = container.multiselect(f"**Select two prompts as parent prompts**", prompt_list, key=f"multi_select_{i}")
-            if len(selected_prompts) == 2 and st.button(f"**Generate child prompts**", key=f"button_{i}"):
+            selected_nums = container.multiselect(f"**Select two prompts as parent prompts**", range(1, 6), key=f"multi_select_{i}")
+            if len(selected_nums) == 2:
+                selected_prompts = [prompt_list[selected_nums[0] - 1], prompt_list[selected_nums[1] - 1]]
+            if len(selected_nums) == 2 and st.button(f"**Generate child prompts**", key=f"button_{i}"):
                 st.session_state['choices'][i] = selected_prompts
                 child_prompts = parent2child_prompt(st.session_state['init_prompt'], selected_prompts[0], selected_prompts[1], 5)
                 st.session_state['all_prompt_lists'][i+1] = child_prompts
@@ -113,8 +167,15 @@ def main():
                 st.write("\n")
                 st.write(f"**Generation {i + 1}:**")
                 for j in range(5):
-                    st.write(j + 1, st.session_state['all_prompt_lists'][i + 1][j])
-    
+                    prompt = st.session_state['all_prompt_lists'][i + 1][j]
+                    st.write(j + 1, prompt)
+
+                    img = st.session_state['img_cache'].get(prompt)
+                    if img is None:
+                        img = imagine(prompt)
+                        st.session_state['img_cache'][prompt] = img
+                    st.image(img, use_column_width=True)
+                    
     if st.button(':violet[**Try another initial prompt**]:leftwards_arrow_with_hook:', key="refresh"):
         st.session_state['all_prompt_lists'] = [None] * 1000
         st.session_state['all_selected_lists'] = [None] * 1000
