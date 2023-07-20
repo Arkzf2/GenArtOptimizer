@@ -9,6 +9,7 @@ from io import BytesIO
 import time
 
 openai.api_key = os.getenv('OPENAI_API_KEY')
+mj_api_key = os.getenv('MJ_API_KEY')
 
 rule = """
 You are acting as a prompt generator and optimizer for an AI image generator. 
@@ -73,7 +74,7 @@ def parent2child_prompt(init_prompt, prompt_A, prompt_B, n):
 @st.cache_data
 def imagine(prompt):
   headers = {
-  'Authorization': 'Bearer 06d35037-5aab-474c-8ab0-e9e734875afa',
+  'Authorization': f'Bearer {mj_api_key}',
   'Content-Type': 'application/json'
   }
 
