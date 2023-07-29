@@ -99,18 +99,19 @@ def main():
             container = st.container()
             prompt_mat = st.session_state['all_prompt_lists'][i]
             selected_nums = container.multiselect(f"**Select two prompts as parent prompts**", range(1, 6), key=f"multi_select_{i}")
+            rate_list = []
             if len(selected_nums) == 2:
                 selected_prompts = [prompt_mat[selected_nums[0] - 1], prompt_mat[selected_nums[1] - 1]]
 
-                subject_rate = st.slider('rate the subject', min_value=0, max_value=10)
-                style_rate = st.slider('rate the style', min_value=0, max_value=10)
-                color_rate = st.slider('rate the color', min_value=0, max_value=10)
-                angle_rate = st.slider('rate the angle', min_value=0, max_value=10)
-                light_rate = st.slider('rate the light', min_value=0, max_value=10)
-                renderer_rate = st.slider('rate the renderer', min_value=0, max_value=10)
+                subject_rate = st.slider('rate the subject', min_value=0, max_value=10, key=f"slider_subject_{i}")
+                style_rate = st.slider('rate the style', min_value=0, max_value=10, key=f"slider_style_{i}")
+                color_rate = st.slider('rate the color', min_value=0, max_value=10, key=f"slider_color_{i}")
+                angle_rate = st.slider('rate the angle', min_value=0, max_value=10, key=f"slider_angle_{i}")
+                light_rate = st.slider('rate the light', min_value=0, max_value=10, key=f"slider_light_{i}")
+                renderer_rate = st.slider('rate the renderer', min_value=0, max_value=10, key=f"slider_renderer_{i}")
                 rate_list = [subject_rate, style_rate, color_rate, angle_rate, light_rate, renderer_rate]
 
-            if len(selected_nums) == 2 and st.button(f"**Generate child prompts & images**", key=f"button_{i}"):
+            if len(rate_list) == 6 and st.button(f"**Generate child prompts & images**", key=f"button_{i}"):
                 st.session_state['choices'][i] = selected_prompts
                 child_prompts = gpt_prompt.genetic(selected_prompts[0], selected_prompts[1], rate_list=rate_list, keyword_mat=st.session_state['keyword_mat'])
                 st.session_state['all_prompt_lists'][i+1] = child_prompts
@@ -122,7 +123,7 @@ def main():
             if st.session_state['choices'][i] is not None:
                 st.write(f"**Your selcetion from Generation {i}:**")
                 for j in range(2):
-                    st.write(j + 1, gpt_prompt.list2str(st.session_state['all_selected_lists'][i][j]), option)
+                    st.write(j + 1, gpt_prompt.list2str(st.session_state['all_selected_lists'][i][j], option))
                 st.write("\n")
                 st.write(f"**Generation {i + 1}:**")
                 for j in range(5):
