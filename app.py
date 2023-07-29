@@ -43,8 +43,10 @@ def imagine(prompt):
     attempts = 0
     max_attempts = 3
     while attempts <= max_attempts:
+        time.sleep(3)
         response_image = requests.request("POST", url, headers=headers, data=payload_image)
-        messageId = response_image.json().get('messageId')
+        if response_image.status_code == 200:
+            messageId = response_image.json().get('messageId')
 
         url = f"https://api.thenextleg.io/v2/message/{messageId}?expireMins=2"
         
