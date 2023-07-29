@@ -14,40 +14,47 @@ mj_api_key = os.getenv('MJ_API_KEY')
 
 @st.cache_data
 def imagine(prompt):
-  headers = {
-  'Authorization': f'Bearer {mj_api_key}',
-  'Content-Type': 'application/json'
-  }
+    headers = {
+    'Authorization': f'Bearer {mj_api_key}',
+    'Content-Type': 'application/json'
+    }
 
-  url = "https://api.thenextleg.io/v2/imagine"
+    url = "https://api.thenextleg.io/v2/imagine"
 
-  payload_image = json.dumps({
-  "msg": prompt,
-  "ref": "",
-  "webhookOverride": "", 
-  "ignorePrefilter": "false"
-  })
+    payload_image = json.dumps({
+    "msg": prompt,
+    "ref": "",
+    "webhookOverride": "", 
+    "ignorePrefilter": "false"
+    })
 
-  response_image = requests.request("POST", url, headers=headers, data=payload_image)
-  messageId = response_image.json().get('messageId')
+    def check_task_status():
+        while True:
+            response_result = requests.request("GET", url, headers=headers)
+            if response_result.status_code == 200:
+                json_response = json.loads(response_result.text)
+                progress = json_response['progress']
+                if progress == 100:
+                    return json_response["response"]['imageUrl']
+            else:
+                st.write(f"Request failed, status code: {response_result.status_code}")
+            time.sleep(3)
 
-  url = f"https://api.thenextleg.io/v2/message/{messageId}?expireMins=2"
-  
-  def check_task_status():
-    while True:
-      response_result = requests.request("GET", url, headers=headers)
-      if response_result.status_code == 200:
-        json_response = json.loads(response_result.text)
-        progress = json_response['progress']
-        if progress == 100:
-          return json_response["response"]['imageUrl']
-      else:
-        print(f"Request failed, status code: {response_result.status_code}")
-      time.sleep(3)
+    attempts = 0
+    max_attempts = 3
+    while attempts <= max_attempts:
+        response_image = requests.request("POST", url, headers=headers, data=payload_image)
+        messageId = response_image.json().get('messageId')
 
-  if messageId:
-    img_url = check_task_status()
-    return img_url
+        url = f"https://api.thenextleg.io/v2/message/{messageId}?expireMins=2"
+        
+        if messageId:
+            img_url = check_task_status()
+            if img_url is not None and img_url != '':
+                return img_url
+            else:
+                attempts += 1
+    raise ValueError("Unable to get valid image URL after multiple attempts")
 
 def main():
 
@@ -92,8 +99,8 @@ def main():
             if img is None:
                 img = imagine(prompt)
                 st.session_state['img_cache'][prompt] = img
-            st.image(img)
             st.write(img)
+            st.image(img)
 
         for i in range(st.session_state['count']):
             container = st.container()
@@ -134,8 +141,8 @@ def main():
                     if img is None:
                         img = imagine(prompt)
                         st.session_state['img_cache'][prompt] = img
-                    st.image(img)
                     st.write(img)
+                    st.image(img)
                     
     if st.button(':violet[**Try another initial prompt**]:leftwards_arrow_with_hook:', key="refresh"):
         st.session_state['all_prompt_lists'] = [None] * 1000
