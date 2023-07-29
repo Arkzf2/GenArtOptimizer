@@ -92,7 +92,8 @@ def main():
             if img is None:
                 img = imagine(prompt)
                 st.session_state['img_cache'][prompt] = img
-            st.image(img, use_column_width=True)
+            st.image(img)
+            st.write(img)
 
         for i in range(st.session_state['count']):
             container = st.container()
@@ -132,7 +133,8 @@ def main():
                     if img is None:
                         img = imagine(prompt)
                         st.session_state['img_cache'][prompt] = img
-                    st.image(img, use_column_width=True)
+                    st.image(img)
+                    st.write(img)
                     
     if st.button(':violet[**Try another initial prompt**]:leftwards_arrow_with_hook:', key="refresh"):
         st.session_state['all_prompt_lists'] = [None] * 1000
@@ -140,6 +142,8 @@ def main():
         st.session_state['init_prompt'] = ""
         st.session_state['count'] = 1
         st.session_state['choices'] = [None] * 1000
+        st.session_state['img_cache'] = {}
+        st.session_state['keyword_mat'] = None
         st.experimental_rerun()
 
 if __name__ == '__main__':
