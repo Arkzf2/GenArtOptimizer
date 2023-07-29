@@ -44,6 +44,7 @@ def imagine(prompt):
     max_attempts = 3
     while attempts <= max_attempts:
         time.sleep(3)
+        messageId = None
         response_image = requests.request("POST", url, headers=headers, data=payload_image)
         if response_image.status_code == 200:
             messageId = response_image.json().get('messageId')
@@ -120,7 +121,7 @@ def main():
                 renderer_rate = st.slider('rate the renderer', min_value=0, max_value=10, key=f"slider_renderer_{i}")
                 rate_list = [subject_rate, style_rate, color_rate, angle_rate, light_rate, renderer_rate]
 
-            if len(rate_list) == 6 and st.button(f"**Generate child prompts & images**", key=f"button_{i}"):
+            if len(selected_nums) == 2 and st.button(f"**Generate child prompts & images**", key=f"button_{i}"):
                 st.session_state['choices'][i] = selected_prompts
                 child_prompts = gpt_prompt.genetic(selected_prompts[0], selected_prompts[1], rate_list=rate_list, keyword_mat=st.session_state['keyword_mat'])
                 st.session_state['all_prompt_lists'][i+1] = child_prompts
