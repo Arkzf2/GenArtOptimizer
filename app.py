@@ -128,9 +128,9 @@ def main():
 
             if len(selected_nums) == 2:
                 if st.button(f"**Generate child prompts & images**", key=button_key):
-                    st.session_state[button_key] = True
+                    st.session_state[f'{button_key}_clicked'] = True
                 
-            if len(selected_nums) == 2 and st.session_state[button_key]:
+            if len(selected_nums) == 2 and st.session_state.get(f'{button_key}_clicked', False):
                 st.session_state['choices'][i] = selected_prompts
                 child_prompts = gpt_prompt.genetic(selected_prompts[0], selected_prompts[1], rate_list=rate_list, keyword_mat=st.session_state['keyword_mat'])
                 st.session_state['all_prompt_lists'][i+1] = child_prompts
@@ -156,7 +156,7 @@ def main():
                     st.write(img)
                     st.image(img)
                     
-    if st.button(':violet[**Try another initial prompt**]:leftwards_arrow_with_hook:', key="refresh"):
+    if st.button(':leftwards_arrow_with_hook::violet[**Try another initial prompt**]', key="refresh"):
         st.session_state['all_prompt_lists'] = [None] * 1000
         st.session_state['all_selected_lists'] = [None] * 1000
         st.session_state['init_prompt'] = ""
