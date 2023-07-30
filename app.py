@@ -28,7 +28,7 @@ def imagine(prompt):
     "ignorePrefilter": "false"
     })
 
-    def check_task_status():
+    def check_task_status(url):  # 这里添加 url 参数
         while True:
             response_result = requests.request("GET", url, headers=headers)
             if response_result.status_code == 200:
@@ -49,10 +49,10 @@ def imagine(prompt):
         if response_image.status_code == 200:
             messageId = response_image.json().get('messageId')
 
-        url = f"https://api.thenextleg.io/v2/message/{messageId}?expireMins=2"
+        url_with_id = f"https://api.thenextleg.io/v2/message/{messageId}?expireMins=2"
         
         if messageId:
-            img_url = check_task_status()
+            img_url = check_task_status(url_with_id)
             if img_url is not None and img_url != '':
                 return img_url
             else:
