@@ -103,7 +103,7 @@ def main():
                 img = imagine(prompt)
                 st.session_state['img_cache'][prompt] = img
             st.write(img)
-            # st.image(img)
+            st.image(img)
 
         for i in range(st.session_state['count']):
             container = st.container()
@@ -119,9 +119,9 @@ def main():
                 angle_rate = st.slider('rate the angle', min_value=0, max_value=10, key=f"slider_angle_{i}")
                 light_rate = st.slider('rate the light', min_value=0, max_value=10, key=f"slider_light_{i}")
                 renderer_rate = st.slider('rate the renderer', min_value=0, max_value=10, key=f"slider_renderer_{i}")
-                rate_list = [subject_rate, style_rate, color_rate, angle_rate, light_rate, renderer_rate]
+            rate_list = [subject_rate, style_rate, color_rate, angle_rate, light_rate, renderer_rate]
 
-            if len(selected_nums) == 2 and st.button(f"**Generate child prompts & images**", key=f"button_{i}"):
+            if st.button(f"**Generate child prompts & images**", key=f"button_{i}"):
                 st.session_state['choices'][i] = selected_prompts
                 child_prompts = gpt_prompt.genetic(selected_prompts[0], selected_prompts[1], rate_list=rate_list, keyword_mat=st.session_state['keyword_mat'])
                 st.session_state['all_prompt_lists'][i+1] = child_prompts
@@ -145,7 +145,7 @@ def main():
                         img = imagine(prompt)
                         st.session_state['img_cache'][prompt] = img
                     st.write(img)
-                    # st.image(img)
+                    st.image(img)
                     
     if st.button(':violet[**Try another initial prompt**]:leftwards_arrow_with_hook:', key="refresh"):
         st.session_state['all_prompt_lists'] = [None] * 1000
