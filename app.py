@@ -119,16 +119,16 @@ def main():
                 angle_rate = st.slider('rate the angle', min_value=0, max_value=10, key=f"slider_angle_{i}")
                 light_rate = st.slider('rate the light', min_value=0, max_value=10, key=f"slider_light_{i}")
                 renderer_rate = st.slider('rate the renderer', min_value=0, max_value=10, key=f"slider_renderer_{i}")
-            rate_list = [subject_rate, style_rate, color_rate, angle_rate, light_rate, renderer_rate]
+                rate_list = [subject_rate, style_rate, color_rate, angle_rate, light_rate, renderer_rate]
 
-            if st.button(f"**Generate child prompts & images**", key=f"button_{i}"):
+            if len(selected_nums) == 2 and st.button(f"**Generate child prompts & images**", key=f"button_{i}"):
                 st.session_state['choices'][i] = selected_prompts
                 child_prompts = gpt_prompt.genetic(selected_prompts[0], selected_prompts[1], rate_list=rate_list, keyword_mat=st.session_state['keyword_mat'])
                 st.session_state['all_prompt_lists'][i+1] = child_prompts
                 st.session_state['all_selected_lists'][i] = selected_prompts
                 if i + 1 == st.session_state['count']:
                     st.session_state['count'] += 1
-                    st.experimental_rerun()
+                    # st.experimental_rerun()
             
             if st.session_state['choices'][i] is not None:
                 st.write(f"**Your selcetion from Generation {i}:**")
