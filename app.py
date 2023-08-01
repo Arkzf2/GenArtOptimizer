@@ -193,5 +193,5 @@ if np.size(st.session_state.prompts) > 0:
             st.sidebar.markdown(f"## Generation {i}")
             for idx, img in enumerate(past_images):
                 prompt = gpt_prompt.list2str(st.session_state.prompt_history[i][idx], option)
-                caption = prompt + (f" - Selected" if idx in selected else "")
+                caption = prompt + (f" - Selected" if (idx+1) in selected else "")
                 st.sidebar.image(img, caption=caption)
