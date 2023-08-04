@@ -315,16 +315,23 @@ def cross(prompt_A, prompt_B):
     
     return prompt_child
 
-def genetic(prompt_A, prompt_B, rate_list, keyword_mat):
+def genetic(prompt_A, prompt_B, rate_list, keyword_mat, mutate_rate):
+    m = 0.2
+    if mutate_rate == 'high':
+        m = 0.1
+    elif mutate_rate == 'medium':
+        m = 0.2
+    elif mutate_rate == 'low':
+        m = 0.3
 
     prompt_list = []
 
-    subject_rate = np.exp(-0.2 * rate_list[0])
-    style_rate = np.exp(-0.2 * rate_list[1])
-    color_rate = np.exp(-0.2 * rate_list[2])
-    angle_rate = np.exp(-0.2 * rate_list[3])
-    light_rate = np.exp(-0.2 * rate_list[4])
-    renderer_rate = np.exp(-0.2 * rate_list[5])
+    subject_rate = np.exp(-m * rate_list[0])
+    style_rate = np.exp(-m * rate_list[1])
+    color_rate = np.exp(-m * rate_list[2])
+    angle_rate = np.exp(-m * rate_list[3])
+    light_rate = np.exp(-m * rate_list[4])
+    renderer_rate = np.exp(-m * rate_list[5])
     # subject_rate = rate_list[0] / 10
     # style_rate = rate_list[1] / 10
     # color_rate = rate_list[2] / 10

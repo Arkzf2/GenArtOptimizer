@@ -7,7 +7,6 @@ from PIL import Image
 from io import BytesIO
 import time
 import numpy as np
-from concurrent.futures import ThreadPoolExecutor, as_completed
 import gpt_prompt
 
 openai.api_key = os.getenv('OPENAI_API_KEY')
@@ -36,7 +35,7 @@ def imagine(prompt):
                 json_response = json.loads(response_result.text)
                 progress = json_response['progress']
                 if progress == 100:
-                    return json_response["response"]['imageUrl']
+                    return json_response["response"]['imageUrl'], json_response["response"]['imageUrls']
             else:
                 st.write(f"Request failed, status code: {response_result.status_code}")
             time.sleep(3)
@@ -44,7 +43,7 @@ def imagine(prompt):
     attempts = 0
     max_attempts = 3
     while attempts <= max_attempts:
-        time.sleep(3)
+        time.sleep(1)
         messageId = None
         response_image = requests.request("POST", url, headers=headers, data=payload_image)
         if response_image.status_code == 200:
@@ -53,9 +52,9 @@ def imagine(prompt):
         url_with_id = f"https://api.thenextleg.io/v2/message/{messageId}?expireMins=2"
         
         if messageId:
-            img_url = check_task_status(url_with_id)
+            img_url, img_urls = check_task_status(url_with_id)
             if img_url is not None and img_url != '':
-                return img_url
+                return img_url, img_urls
             else:
                 attempts += 1
     raise ValueError("Unable to get valid image URL after multiple attempts")
@@ -69,8 +68,16 @@ if 'prompt_history' not in st.session_state:
     st.session_state.prompt_history = []
 if 'images' not in st.session_state:
     st.session_state.images = []
+if 'single_images' not in st.session_state:
+    st.session_state.single_images = []
+if 'blender_images' not in st.session_state:
+    st.session_state.blender_images = []
+if 'blender_urls' not in st.session_state: 
+    st.session_state.blender_urls = []
 if 'image_history' not in st.session_state:
     st.session_state.image_history = []
+if 'single_image_history' not in st.session_state:
+    st.session_state.single_image_history = []
 if 'selection_history' not in st.session_state:
     st.session_state.selection_history = []
 if 'selected_images' not in st.session_state:
@@ -86,6 +93,7 @@ st.title("Genjourney:dna:")
 
 # choose the mj mode
 option = st.radio('**Choose a Midjourney mode:**', ('Midjourney Model V5.2', 'Niji Model V5'))
+mutate_rate = st.radio('**Set the mutate rate:**', ('Low', 'Medium', 'High'))
 
 # input init prompt and generate prompts of generation 0
 st.session_state.init_prompt = st.text_input("**Enter your initial prompt**", value=st.session_state.init_prompt)
@@ -101,13 +109,27 @@ if np.size(st.session_state.prompts) > 0:
     st.markdown("# Current Images")
 
     image_list = []
+    single_image_list = []
+
+    
+
     for i in range(len(st.session_state.prompts)):
         prompt = gpt_prompt.list2str(st.session_state.prompts[i], option)
-        st.write(i+1, prompt)
-        img = imagine(prompt)
+
+        if len(st.session_state.blender_urls) > 0:
+            for url in st.session_state.blender_urls:
+                prompt = ' ' + url + ' ' + prompt
+
+        st.write(i+1)
+        img, single_imgs = imagine(prompt)
         st.image(img, caption=prompt)
+        for j in range(4):
+            st.write(f"U{j+1}: {single_imgs[j]}")
         image_list.append(img)
+        single_image_list.append(single_imgs)
+
     st.session_state.images = image_list
+    st.session_state.single_images = single_image_list
 
     # # multi-thread
     # def get_image(prompt):
@@ -144,23 +166,57 @@ if np.size(st.session_state.prompts) > 0:
     # st.session_state.images = image_list
 
     with st.form(key='my_form'):
-        # let user to choose two prompts as parent prompts
-        st.session_state.selected_images = st.multiselect('Select two prompts as parent prompts', range(1, 6), key=f"select_{st.session_state.round_count}")
+
+        # let user to choose images to blend
+        # option_mapping = {'1️⃣ U1': [0,0], '1️⃣ U2': [0,1], '1️⃣ U3': [0,2], '1️⃣ U4': [0,3],
+        #               '2️⃣ U1': [1,0], '2️⃣ U2': [1,1], '2️⃣ U3': [1,2], '2️⃣ U4': [1,3],
+        #               '3️⃣ U1': [2,0], '3️⃣ U2': [2,1], '3️⃣ U3': [2,2], '3️⃣ U4': [2,3],
+        #               '4️⃣ U1': [3,0], '4️⃣ U2': [3,1], '4️⃣ U3': [3,2], '4️⃣ U4': [3,3],
+        #               '5️⃣ U1': [4,0], '5️⃣ U2': [4,1], '5️⃣ U3': [4,2], '5️⃣ U4': [4,3]}
+
+        # blend = st.multiselect('Pick the image(s) if you want to blend it(them) into next generation',
+        #         ['1️⃣ U1', '1️⃣ U2', '1️⃣ U3', '1️⃣ U4',
+        #         '2️⃣ U1', '2️⃣ U2', '2️⃣ U3', '2️⃣ U4',
+        #         '3️⃣ U1', '3️⃣ U2', '3️⃣ U3', '3️⃣ U4',
+        #         '4️⃣ U1', '4️⃣ U2', '4️⃣ U3', '4️⃣ U4',
+        #         '5️⃣ U1', '5️⃣ U2', '5️⃣ U3', '5️⃣ U4'],
+        #         key=f"multiselect_{i}_st.session_state.round_count")
+
+        # blender_urls = []
+        # for option in blend:
+        #     i = option_mapping[option][0]
+        #     j = option_mapping[option][1]
+        #     url = st.session_state.single_images[i][j]
+        #     blender_urls.append(url)
         
-        # let user to rate the art styles
-        # if st.session_state.selected_images and len(st.session_state.selected_images) == 2:
-        if st.session_state.selected_images:
-            if len(st.session_state.selected_images) != 2:
-                st.warning('Please select exactly two images and set scores for them.')
-            else:
-                subject_rate = st.slider('rate the subject', min_value=0, max_value=10, value=5, key=f"slider_subject_{st.session_state.round_count}_{i}")
-                style_rate = st.slider('rate the style', min_value=0, max_value=10, value=5, key=f"slider_style_{st.session_state.round_count}_{i}")
-                color_rate = st.slider('rate the color', min_value=0, max_value=10, value=5, key=f"slider_color_{st.session_state.round_count}_{i}")
-                angle_rate = st.slider('rate the angle', min_value=0, max_value=10, value=5, key=f"slider_angle_{st.session_state.round_count}_{i}")
-                light_rate = st.slider('rate the light', min_value=0, max_value=10, value=5, key=f"slider_light_{st.session_state.round_count}_{i}")
-                renderer_rate = st.slider('rate the renderer', min_value=0, max_value=10, value=5, key=f"slider_renderer_{st.session_state.round_count}_{i}")
-                rate_list = [subject_rate, style_rate, color_rate, angle_rate, light_rate, renderer_rate]
-                st.session_state.scores = rate_list
+        # st.session_state.blender_images = blender_urls
+
+        st.session_state.blender_images = st.multiselect('Pick the image(s) if you want to blend it(them) into next generation',
+            ['1️⃣ U1', '1️⃣ U2', '1️⃣ U3', '1️⃣ U4',
+            '2️⃣ U1', '2️⃣ U2', '2️⃣ U3', '2️⃣ U4',
+            '3️⃣ U1', '3️⃣ U2', '3️⃣ U3', '3️⃣ U4',
+            '4️⃣ U1', '4️⃣ U2', '4️⃣ U3', '4️⃣ U4',
+            '5️⃣ U1', '5️⃣ U2', '5️⃣ U3', '5️⃣ U4'],
+            key=f"multiselect_{i}_st.session_state.round_count")
+
+        if len(st.session_state.blender_images) > 3:
+            st.warning('Please select no more than three images to blend')
+        elif len(st.session_state.blender_images) >= 0:
+            # let user to choose two prompts as parent prompts
+            st.session_state.selected_images = st.multiselect('Select two prompts as parent prompts', range(1, 6), key=f"select_{st.session_state.round_count}")
+            # let user to rate the art styles
+            if st.session_state.selected_images:
+                if len(st.session_state.selected_images) != 2:
+                    st.warning('Please select exactly two images and set scores for them.')
+                else:
+                    subject_rate = st.slider('rate the subject', min_value=0, max_value=10, value=5, key=f"slider_subject_{st.session_state.round_count}_{i}")
+                    style_rate = st.slider('rate the style', min_value=0, max_value=10, value=5, key=f"slider_style_{st.session_state.round_count}_{i}")
+                    color_rate = st.slider('rate the color', min_value=0, max_value=10, value=5, key=f"slider_color_{st.session_state.round_count}_{i}")
+                    angle_rate = st.slider('rate the angle', min_value=0, max_value=10, value=5, key=f"slider_angle_{st.session_state.round_count}_{i}")
+                    light_rate = st.slider('rate the light', min_value=0, max_value=10, value=5, key=f"slider_light_{st.session_state.round_count}_{i}")
+                    renderer_rate = st.slider('rate the renderer', min_value=0, max_value=10, value=5, key=f"slider_renderer_{st.session_state.round_count}_{i}")
+                    
+                    st.session_state.scores = [subject_rate, style_rate, color_rate, angle_rate, light_rate, renderer_rate]
         
         # submit button
         submit_button = st.form_submit_button(label='Submit for Next Generation')
@@ -172,17 +228,33 @@ if np.size(st.session_state.prompts) > 0:
             # store history
             st.session_state.prompt_history.append(st.session_state.prompts)
             st.session_state.image_history.append(st.session_state.images)
+            st.session_state.single_image_history.append(st.session_state.single_images)
             st.session_state.selection_history.append(st.session_state.selected_images)
 
             # generate prompts of next generation
             prompt_A = st.session_state.prompts[st.session_state.selected_images[0]-1]
             prompt_B = st.session_state.prompts[st.session_state.selected_images[1]-1]
-            st.session_state.prompts = gpt_prompt.genetic(prompt_A, prompt_B, st.session_state.scores, st.session_state.keyword_mat)
+            st.session_state.prompts = gpt_prompt.genetic(prompt_A, prompt_B, st.session_state.scores, st.session_state.keyword_mat, mutate_rate)
+            
+            option_mapping = {'1️⃣ U1': [0,0], '1️⃣ U2': [0,1], '1️⃣ U3': [0,2], '1️⃣ U4': [0,3],
+                              '2️⃣ U1': [1,0], '2️⃣ U2': [1,1], '2️⃣ U3': [1,2], '2️⃣ U4': [1,3],
+                              '3️⃣ U1': [2,0], '3️⃣ U2': [2,1], '3️⃣ U3': [2,2], '3️⃣ U4': [2,3],
+                              '4️⃣ U1': [3,0], '4️⃣ U2': [3,1], '4️⃣ U3': [3,2], '4️⃣ U4': [3,3],
+                              '5️⃣ U1': [4,0], '5️⃣ U2': [4,1], '5️⃣ U3': [4,2], '5️⃣ U4': [4,3]}
+    
+            blender_urls = []
+            for option in st.session_state.blender_images:
+                i = option_mapping[option][0]
+                j = option_mapping[option][1]
+                url = st.session_state.single_images[i][j]
+                blender_urls.append(url)
+            st.session_state.blender_urls = blender_urls
 
             # increase round count
             st.session_state.round_count += 1
 
             # clear selection and scores
+            st.session_state.blender_images = []
             st.session_state.selected_images = []
             st.session_state.scores = []
 
