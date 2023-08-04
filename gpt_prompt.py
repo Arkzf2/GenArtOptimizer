@@ -34,7 +34,7 @@ def subject(init_prompt):
 
     {prompt_rule}
 
-    Based on the intial prompt I provide: {init_prompt}, you need to generate no more than 5 descriptive expansion keyword phrases to add detail and the phrases should be seperated by comma.
+    Based on the intial prompt I provide: {init_prompt}, you need to generate 5 descriptive expansion keyword phrases to add details and the phrases should be seperated by comma.
     Expansion phrases should be developed based on the theme content, that is to frame the content of the art image or what is the people/animal/object doing or the surrounding environment (A clear description will make the image generation effect better).
 
     The length of all tokens should be no more than 20.
@@ -42,7 +42,7 @@ def subject(init_prompt):
     Try not to use prepositional phrases because Midjourney Bot does not understand them very well.
 
     The final prompt should follow the following structure:
-    <init_prompt>, <keyword1>, <keyword2>, <keyword3>, ...
+    <init_prompt>, <keyword1>, <keyword2>, <keyword3>, <keyword4>, <keyword5>, <keyword5>
 
     Generate 20 different prompts and list your prompts as follows:
     1. <prompt1>
@@ -264,6 +264,8 @@ def list2str(prompt_l, midorniji='Midjourney Model V5.2'):
     prompt = prompt.rstrip()
     if prompt[-1] == ',':
         prompt = prompt[:-1]
+    if midorniji == 'Midjourney Model V5.2':
+        prompt += ' --v 5.2'
     if midorniji == 'Niji Model V5':
         prompt += ' --niji 5'
     
