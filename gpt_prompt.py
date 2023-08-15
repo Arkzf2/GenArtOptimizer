@@ -2,17 +2,35 @@ import openai
 import os
 import re
 import numpy as np
+import time
+import requests
+import json
 
 openai.api_key = os.getenv('OPENAI_API_KEY')
 
 def get_completion(prompt, model='gpt-3.5-turbo'):
     messages = [{'role': 'user', 'content': prompt}]
-    response = openai.ChatCompletion.create(
-        model = model,
-        messages = messages,
-        temperature = 1.0,
-    )
-    return response['choices'][0]['message']['content']
+    
+    max_retries = 5
+    retry_delay = 10
+
+    for i in range(max_retries):
+        try:
+            response = openai.ChatCompletion.create(
+                model=model,
+                messages=messages,
+                temperature=1.0,
+            )
+            return response['choices'][0]['message']['content']
+
+        except Exception as e:
+
+            if i < max_retries - 1:
+                time.sleep(retry_delay)
+                continue
+            else:
+                print(f"Failed after {max_retries} attempts. Please try again later.")
+                break
 
 def text2list(text):
     l = re.split('\d+\.', text.strip())
@@ -44,16 +62,16 @@ def subject(init_prompt):
     The final prompt should follow the following structure:
     <init_prompt>, <keyword1>, <keyword2>, <keyword3>, <keyword4>, <keyword5>, <keyword5>
 
-    Generate 20 different prompts and list your prompts as follows:
+    Generate 30 different prompts and list your prompts as follows:
     1. <prompt1>
     2. <prompt2>
     ...
-    20. <prompt20>
+    30. <prompt30>
 
     """
 
     list = []
-    while len(list) != 20:
+    while len(list) != 30:
         response = get_completion(prompt)
         list = text2list(response)
 
@@ -67,7 +85,7 @@ def visual_art_style(init_prompt):
 
     Visual art style keywords can be such as: cyberpunk, pixel style, anime, Ukiyo-e, photo-realistic, science fiction, ink painting, cinematic, c4d, etc.
 
-    Refer to the given examples, you need to generate 20 creative visual art style keywords for the theme of: {init_prompt}.
+    Refer to the given examples, you need to generate 30 creative visual art style keywords for the theme of: {init_prompt}.
 
     If the visual art style has been mentioned in the initial prompt: {init_prompt}, your generation should be similar to the mentioned visual art style.
 
@@ -75,12 +93,12 @@ def visual_art_style(init_prompt):
     1. <keywords1>
     2. <keywords2>
     ...
-    20. <keywords20>
+    30. <keywords30>
 
     """
 
     list = []
-    while len(list) != 20:
+    while len(list) != 30:
         response = get_completion(prompt)
         list = text2list(response)
 
@@ -94,7 +112,7 @@ def showy_style(init_prompt):
 
     Showy image style keywords can be such as: bioluminescence effect, hologram, craveing, cutaway, ascii art, motion blur, sparkle, dynamic pose, etc.
 
-    Refer to the given examples, you need to generate 20 creative showy image style keywords for the theme of: {init_prompt}.
+    Refer to the given examples, you need to generate 30 creative showy image style keywords for the theme of: {init_prompt}.
 
     If the showy style has been mentioned in the initial prompt: {init_prompt}, your generation should be similar to the mentioned showy style.
 
@@ -102,12 +120,12 @@ def showy_style(init_prompt):
     1. <keywords1>
     2. <keywords2>
     ...
-    20. <keywords20>
+    30. <keywords30>
 
     """
 
     list = []
-    while len(list) != 20:
+    while len(list) != 30:
         response = get_completion(prompt)
         list = text2list(response)
 
@@ -121,7 +139,7 @@ def artist_style(init_prompt):
 
     Artists can be such as: Makoto Shinkai, Studio Ghibli, Pixar, Hayao Miyazaki, Disney, Michael Whelan, Van Gogh, Kandinksey, Amanda Sage, Alphonso Mucha, Alena Aenami, Andy Warhol, etc.
 
-    Refer to the given examples, you need to generate 20 artists for the theme of: {init_prompt}.
+    Refer to the given examples, you need to generate 30 artists for the theme of: {init_prompt}.
 
     If the artist has been mentioned in the initial prompt: {init_prompt}, your generation should be similar to the mentioned artist.
     
@@ -131,12 +149,12 @@ def artist_style(init_prompt):
     1. <artist1>
     2. <artist2>
     ...
-    20. <artist20>
+    30. <artist30>
 
     """
 
     list = []
-    while len(list) != 20:
+    while len(list) != 30:
         response = get_completion(prompt)
         list = text2list(response)
 
@@ -150,7 +168,7 @@ def color_style(init_prompt):
 
     Color schemes can be such as: Macarons, Muted Tones, black and white, laser candy paper color, maple red, neon shades, etc.
 
-    Refer to the given examples, you need to generate 20 artists for the theme of: {init_prompt}.
+    Refer to the given examples, you need to generate 30 artists for the theme of: {init_prompt}.
 
     If the color scheme has been mentioned in the initial prompt: {init_prompt}, your generation should be similar to the mentioned color scheme.
 
@@ -158,12 +176,12 @@ def color_style(init_prompt):
     1. <color1>
     2. <color2>
     ...
-    20. <color20>
+    30. <color30>
 
     """
 
     list = []
-    while len(list) != 20:
+    while len(list) != 30:
         response = get_completion(prompt)
         list = text2list(response)
 
@@ -177,7 +195,7 @@ def perspective_style(init_prompt):
 
     Perspectives can be such as: close-up, panoramic view, simulated cemera, faceshot, three views, product view, top-down perspective, fisheyelens, macrolens, etc.
 
-    Refer to the given examples, you need to generate 20 perspectives for the theme of: {init_prompt}.
+    Refer to the given examples, you need to generate 30 perspectives for the theme of: {init_prompt}.
 
     If the perspective has been mentioned in the initial prompt: {init_prompt}, your generation should be similar to the mentioned perspective.
 
@@ -187,12 +205,12 @@ def perspective_style(init_prompt):
     1. <perspective1>
     2. <perspective2>
     ...
-    20. <perspective20>
+    30. <perspective30>
 
     """
 
     list = []
-    while len(list) != 20:
+    while len(list) != 30:
         response = get_completion(prompt)
         list = text2list(response)
 
@@ -206,7 +224,7 @@ def light_style(init_prompt):
 
     Lightings can be such as: cinematic light, intense backlight, studio lighting, crepuscular ray, volumetric lighting, front lighting, hard lighting, rainbow halo, glow in the dark, hair glow, etc.
 
-    Refer to the given examples, you need to generate 20 perspectives for the theme of: {init_prompt}.
+    Refer to the given examples, you need to generate 30 perspectives for the theme of: {init_prompt}.
 
     If the lighting has been mentioned in the initial prompt: {init_prompt}, your generation should be similar to the mentioned lighting.
 
@@ -216,12 +234,12 @@ def light_style(init_prompt):
     1. <lighting1>
     2. <lighting2>
     ...
-    20. <lighting20>
+    30. <lighting30>
 
     """
 
     list = []
-    while len(list) != 20:
+    while len(list) != 30:
         response = get_completion(prompt)
         list = text2list(response)
 
@@ -235,7 +253,7 @@ def rendering_style(init_prompt):
 
     Quality renderings can be such as: subpixel sampling, Arnold renderer, v-ray renderer, C4D renderer, Unreal Engine, Blender renderer, DOF, environment mapping, etc.
 
-    Refer to the given examples, you need to generate 20 atmospheres for the theme of: {init_prompt}.
+    Refer to the given examples, you need to generate 30 atmospheres for the theme of: {init_prompt}.
 
     If the rendering has been mentioned in the initial prompt: {init_prompt}, your generation should be similar to the mentioned rendering.
 
@@ -245,18 +263,18 @@ def rendering_style(init_prompt):
     1. <rendering1>
     2. <rendering2>
     ...
-    20. <rendering20>
+    30. <rendering30>
 
     """
 
     list = []
-    while len(list) != 20:
+    while len(list) != 30:
         response = get_completion(prompt)
         list = text2list(response)
 
     return list
 
-def list2str(prompt_l, midorniji='Midjourney Model V5.2'):
+def list2str(prompt_l, midorniji=''):
 
     prompt = ''
     for i in range(7):
@@ -274,12 +292,12 @@ def list2str(prompt_l, midorniji='Midjourney Model V5.2'):
 def generate(init_prompt, n=10):
     
     subject_list = subject(init_prompt)
-    visual_art_style_list = visual_art_style((init_prompt))
-    artist_style_list = artist_style((init_prompt))
-    color_style_list = color_style((init_prompt))
-    perspective_style_list = perspective_style((init_prompt))
-    light_style_list = light_style((init_prompt))
-    rendering_style_list = rendering_style((init_prompt))
+    visual_art_style_list = visual_art_style(init_prompt)
+    artist_style_list = artist_style(init_prompt)
+    color_style_list = color_style(init_prompt)
+    perspective_style_list = perspective_style(init_prompt)
+    light_style_list = light_style(init_prompt)
+    rendering_style_list = rendering_style(init_prompt)
 
     keyword_mat = np.array([subject_list, visual_art_style_list, artist_style_list, color_style_list, perspective_style_list, light_style_list, rendering_style_list])
 
