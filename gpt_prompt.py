@@ -340,7 +340,7 @@ def genetic(prompt_A, prompt_B, rate_list, keyword_mat, mutate_rate):
     if mutate_rate == 'high':
         m = 0.1
     elif mutate_rate == 'medium':
-        m = 0.2
+        m = 0.15
     elif mutate_rate == 'low':
         m = 0.3
 
@@ -351,13 +351,6 @@ def genetic(prompt_A, prompt_B, rate_list, keyword_mat, mutate_rate):
     color_rate = np.exp(-m * rate_list[2])
     angle_rate = np.exp(-m * rate_list[3])
     light_rate = np.exp(-m * rate_list[4])
-    renderer_rate = np.exp(-m * rate_list[5])
-    # subject_rate = rate_list[0] / 10
-    # style_rate = rate_list[1] / 10
-    # color_rate = rate_list[2] / 10
-    # angle_rate = rate_list[3] / 10
-    # light_rate = rate_list[4] / 10
-    # renderer_rate = rate_list[5] / 10
 
     for i in range(5):
         
@@ -368,29 +361,38 @@ def genetic(prompt_A, prompt_B, rate_list, keyword_mat, mutate_rate):
         color_mutate = np.random.choice(np.array([0, 1]), p=np.array([color_rate, 1-color_rate]))
         angle_mutate = np.random.choice(np.array([0, 1]), p=np.array([angle_rate, 1-angle_rate]))
         light_mutate = np.random.choice(np.array([0, 1]), p=np.array([light_rate, 1-light_rate]))
-        renderer_mutate = np.random.choice(np.array([0, 1]), p=np.array([renderer_rate, 1-renderer_rate]))
 
-        mutate_list = [subject_mutate, style_mutate, color_mutate, angle_mutate, light_mutate, renderer_mutate]
+        mutate_list = [subject_mutate, style_mutate, color_mutate, angle_mutate, light_mutate]
 
         if mutate_list[0] == 1:
             prompt_child = mutate(prompt_child, prompt_child[0], keyword_mat)
         if mutate_list[1] == 1:
-            num = np.random.randint(0, 3)
+            num = np.random.randint(0, 6)
             if num == 0:
                 prompt_child = mutate(prompt_child, prompt_child[1], keyword_mat)
             elif num == 1:
                 prompt_child = mutate(prompt_child, prompt_child[2], keyword_mat)
+            elif num == 2:
+                prompt_child = mutate(prompt_child, prompt_child[6], keyword_mat)
+            elif num == 3:
+                prompt_child = mutate(prompt_child, prompt_child[1], keyword_mat)
+                prompt_child = mutate(prompt_child, prompt_child[2], keyword_mat)
+            elif num == 3:
+                prompt_child = mutate(prompt_child, prompt_child[1], keyword_mat)
+                prompt_child = mutate(prompt_child, prompt_child[6], keyword_mat)
+            elif num == 4:
+                prompt_child = mutate(prompt_child, prompt_child[2], keyword_mat)
+                prompt_child = mutate(prompt_child, prompt_child[6], keyword_mat)
             else:
                 prompt_child = mutate(prompt_child, prompt_child[1], keyword_mat)
                 prompt_child = mutate(prompt_child, prompt_child[2], keyword_mat)
+                prompt_child = mutate(prompt_child, prompt_child[6], keyword_mat)
         if mutate_list[2] == 1:
             prompt_child = mutate(prompt_child, prompt_child[3], keyword_mat)
         if mutate_list[3] == 1:
             prompt_child = mutate(prompt_child, prompt_child[4], keyword_mat)
         if mutate_list[4] == 1:
             prompt_child = mutate(prompt_child, prompt_child[5], keyword_mat)
-        if mutate_list[5] == 1:
-            prompt_child = mutate(prompt_child, prompt_child[6], keyword_mat)
 
         prompt_list.append(prompt_child)
     
