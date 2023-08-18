@@ -19,7 +19,7 @@ def get_completion(prompt, model='gpt-3.5-turbo'):
             response = openai.ChatCompletion.create(
                 model=model,
                 messages=messages,
-                temperature=1.5,
+                temperature=1.0,
             )
             return response['choices'][0]['message']['content']
 
