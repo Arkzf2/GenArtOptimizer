@@ -19,7 +19,7 @@ def get_completion(prompt, model='gpt-3.5-turbo'):
             response = openai.ChatCompletion.create(
                 model=model,
                 messages=messages,
-                temperature=1.0,
+                temperature=1.5,
             )
             return response['choices'][0]['message']['content']
 
@@ -37,20 +37,14 @@ def text2list(text):
     l = [prompt.strip() for prompt in l if prompt]
     return l
 
-prompt_rule = """
-
-Now you should act as a image prompt advisor for an AI art image generator Midjourney.
-Midjourney can generate art images given the text prompt.
-"prompt" refers to a short text phrase used to generate images. The Midjourney Bot breaks down the words and phrases in the prompt into smaller units called tokens. These tokens can be compared with its training data and then used to generate an image. This means that, no matter what the sentence structure is, Midjourney will first decompose long sentences and then generate the final image through a "black box algorithm" for multiple tokens. Therefore, the significance of word order becomes less important.
-Midjourney does not understand grammar, sentence structure, or words like humans do. In many cases, more specific synonyms are more effective. For example, you can replace "big" with words like "huge" or "massive". Reduce the use of words where possible. Using fewer words means that the impact of each word is more powerful. Use commas, parentheses, and conjunctions to help organize your thoughts, but be aware that Midjourney does not reliably interpret them. Midjourney Bot does not distinguish between upper and lower case.
-
-"""
-
-def subject(init_prompt):
+def subject(init_prompt, n=30):
 
     prompt = f"""
 
-    {prompt_rule}
+    Now you should act as a image prompt advisor for an AI art image generator Midjourney.
+    Midjourney can generate art images given the text prompt.
+    "prompt" refers to a short text phrase used to generate images. The Midjourney Bot breaks down the words and phrases in the prompt into smaller units called tokens. These tokens can be compared with its training data and then used to generate an image. This means that, no matter what the sentence structure is, Midjourney will first decompose long sentences and then generate the final image through a "black box algorithm" for multiple tokens. Therefore, the significance of word order becomes less important.
+    Midjourney does not understand grammar, sentence structure, or words like humans do. In many cases, more specific synonyms are more effective. For example, you can replace "big" with words like "huge" or "massive". Reduce the use of words where possible. Using fewer words means that the impact of each word is more powerful. Use commas, parentheses, and conjunctions to help organize your thoughts, but be aware that Midjourney does not reliably interpret them. Midjourney Bot does not distinguish between upper and lower case.
 
     Based on the intial prompt I provide: {init_prompt}, you need to generate 5 descriptive expansion keyword phrases to add details and the phrases should be seperated by comma.
     Expansion phrases should be developed based on the theme content, that is to frame the content of the art image or what is the people/animal/object doing or the surrounding environment (A clear description will make the image generation effect better).
@@ -60,219 +54,109 @@ def subject(init_prompt):
     Try not to use prepositional phrases because Midjourney Bot does not understand them very well.
 
     The final prompt should follow the following structure:
-    <init_prompt>, <keyword1>, <keyword2>, <keyword3>, <keyword4>, <keyword5>, <keyword5>
+    <init_prompt>, <keyword1>, <keyword2>, <keyword3>, <keyword4>, <keyword5>
 
-    Generate 30 different prompts and list your prompts as follows:
+    Generate {n} different prompts and list your prompts as follows:
     1. <prompt1>
     2. <prompt2>
     ...
-    30. <prompt30>
+    {n}. <prompt{n}>
 
     """
 
-    list = []
-    while len(list) != 30:
+    lst = []
+    while len(lst) != 30:
         response = get_completion(prompt)
-        list = text2list(response)
+        lst = text2list(response)
 
-    return list
+    return lst
+
+def modifier_generator(init_prompt, modifier, examples, n=30):
+
+    prompt = f"""
+
+    Examples of {modifier} keyword can be such as: {examples}, etc.
+
+    Refer to the given examples, you need to generate {n} {modifier} keywords for the theme of: {init_prompt}.
+
+    If {modifier} keyword is mationed in the initial prompt: {init_prompt}, then your generation should be very similar to the mentioned {modifier}.
+
+    Ensure your result is not limitted by the given examples.
+
+    Following the rules above, list only the generated keywords as follows:
+    1. <{modifier}1>
+    2. <{modifier}2>
+    ...
+    {n}. <{modifier}{n}>
+
+    """
+
+    lst = []
+    while len(lst) != 30:
+        response = get_completion(prompt)
+        lst = text2list(response)
+
+    return lst
 
 def visual_art_style(init_prompt):
 
-    prompt = f"""
+    modifier = "visual art style"
 
-    I want you to act as an visual artist advisor providing advice on various visual art style keywords.
+    examples = "cyberpunk, futuristic, Rococo, ink painting, 1900s anime, Pixar, surrealism, Chinese painting, Renaissance style, minimalist style, graffiti style, gothic style, Fauvism, 3d, cinematic, photorealistic, industrial, architectural sketching"
 
-    Visual art style keywords can be such as: cyberpunk, pixel style, anime, Ukiyo-e, photo-realistic, science fiction, ink painting, cinematic, c4d, etc.
+    lst = modifier_generator(init_prompt, modifier, examples)
 
-    Refer to the given examples, you need to generate 30 creative visual art style keywords for the theme of: {init_prompt}.
-
-    If the visual art style has been mentioned in the initial prompt: {init_prompt}, your generation should be similar to the mentioned visual art style.
-
-    Following the rules above, list only the generated style keywords as follows:
-    1. <keywords1>
-    2. <keywords2>
-    ...
-    30. <keywords30>
-
-    """
-
-    list = []
-    while len(list) != 30:
-        response = get_completion(prompt)
-        list = text2list(response)
-
-    return list
-
-def showy_style(init_prompt):
-
-    prompt = f"""
-
-    I want you to act as an artist advisor providing advice on various showy image style keywords.
-
-    Showy image style keywords can be such as: bioluminescence effect, hologram, craveing, cutaway, ascii art, motion blur, sparkle, dynamic pose, etc.
-
-    Refer to the given examples, you need to generate 30 creative showy image style keywords for the theme of: {init_prompt}.
-
-    If the showy style has been mentioned in the initial prompt: {init_prompt}, your generation should be similar to the mentioned showy style.
-
-    Following the rules above, list only the generated keywords as follows:
-    1. <keywords1>
-    2. <keywords2>
-    ...
-    30. <keywords30>
-
-    """
-
-    list = []
-    while len(list) != 30:
-        response = get_completion(prompt)
-        list = text2list(response)
-
-    return list
+    return lst
 
 def artist_style(init_prompt):
 
-    prompt = f"""
+    modifier = "artist"
 
-    I want you to act as an artist advisor providing advice on various artists who has strong visual art style.
+    examples = "Junji Ito, H.R. Ford, Jhon Berkey, Studio Ghibli, Alphonso Mucha, Yoneyama Mai, Krenz Cushart, Sandra Chevrier, Van Gogh, Guanzhong Wu, Baishi Qi, Sam Toft, WLOP"
 
-    Artists can be such as: Makoto Shinkai, Studio Ghibli, Pixar, Hayao Miyazaki, Disney, Michael Whelan, Van Gogh, Kandinksey, Amanda Sage, Alphonso Mucha, Alena Aenami, Andy Warhol, etc.
+    lst = modifier_generator(init_prompt, modifier, examples)
 
-    Refer to the given examples, you need to generate 30 artists for the theme of: {init_prompt}.
-
-    If the artist has been mentioned in the initial prompt: {init_prompt}, your generation should be similar to the mentioned artist.
-    
-    Ensure your result is not limitted by the given examples.
-
-    Following the rules above, list only the generated keywords as follows:
-    1. <artist1>
-    2. <artist2>
-    ...
-    30. <artist30>
-
-    """
-
-    list = []
-    while len(list) != 30:
-        response = get_completion(prompt)
-        list = text2list(response)
-
-    return list
+    return lst
 
 def color_style(init_prompt):
 
-    prompt = f"""
+    modifier = "color"
 
-    I want you to act as an artist advisor providing advice on various color schemes.
+    examples = "Macarons, Muted tones, black and white, laser candy paper color, maple red, neon shades, ivory white, red and black tones, rose gold, crystal blue"
 
-    Color schemes can be such as: Macarons, Muted Tones, black and white, laser candy paper color, maple red, neon shades, etc.
+    lst = modifier_generator(init_prompt, modifier, examples)
 
-    Refer to the given examples, you need to generate 30 artists for the theme of: {init_prompt}.
-
-    If the color scheme has been mentioned in the initial prompt: {init_prompt}, your generation should be similar to the mentioned color scheme.
-
-    Following the rules above, list only the generated color schemes as follows:
-    1. <color1>
-    2. <color2>
-    ...
-    30. <color30>
-
-    """
-
-    list = []
-    while len(list) != 30:
-        response = get_completion(prompt)
-        list = text2list(response)
-
-    return list
+    return lst
 
 def perspective_style(init_prompt):
 
-    prompt = f"""
+    modifier = "composition perspective"
 
-    I want you to act as an art advisor providing various perspectives (visual angles).
+    examples = "close-up, panoramic view, simulated cemera, faceshot, full body, perspective, datail shot, side perspective, three views, product view, top-down perspective, fisheyelens, macrolens"
 
-    Perspectives can be such as: close-up, panoramic view, simulated cemera, faceshot, three views, product view, top-down perspective, fisheyelens, macrolens, etc.
+    lst = modifier_generator(init_prompt, modifier, examples)
 
-    Refer to the given examples, you need to generate 30 perspectives for the theme of: {init_prompt}.
-
-    If the perspective has been mentioned in the initial prompt: {init_prompt}, your generation should be similar to the mentioned perspective.
-
-    Ensure your result is not limitted by the given examples.
-
-    Following the rules above, list only the perspective (visual angle) keywords as follows:
-    1. <perspective1>
-    2. <perspective2>
-    ...
-    30. <perspective30>
-
-    """
-
-    list = []
-    while len(list) != 30:
-        response = get_completion(prompt)
-        list = text2list(response)
-
-    return list
+    return lst
 
 def light_style(init_prompt):
 
-    prompt = f"""
+    modifier = "lighting effect"
 
-    I want you to act as an art advisor providing image lightings.
+    examples = "cinematic light, intense backlight, soft lighting, soft moon light, studio lighting, crepuscular ray, volumetric lighting, front lighting, hard lighting, rainbow halo, glow in the dark, rim lighting"
 
-    Lightings can be such as: cinematic light, intense backlight, studio lighting, crepuscular ray, volumetric lighting, front lighting, hard lighting, rainbow halo, glow in the dark, hair glow, etc.
+    lst = modifier_generator(init_prompt, modifier, examples)
 
-    Refer to the given examples, you need to generate 30 perspectives for the theme of: {init_prompt}.
-
-    If the lighting has been mentioned in the initial prompt: {init_prompt}, your generation should be similar to the mentioned lighting.
-
-    Ensure your result is not limitted by the given examples.
-
-    Following the rules above, list only the lighting keywords as follows:
-    1. <lighting1>
-    2. <lighting2>
-    ...
-    30. <lighting30>
-
-    """
-
-    list = []
-    while len(list) != 30:
-        response = get_completion(prompt)
-        list = text2list(response)
-
-    return list
+    return lst
 
 def rendering_style(init_prompt):
 
-    prompt = f"""
+    modifier = "rendering quality"
 
-    I want you to act as an art advisor providing quality renderings.
+    examples = "subpixel sampling, Arnold renderer, V-ray renderer, C4D renderer, Unreal Engine, Blender renderer, 4k, 3DCG, Octane renderer, architectural visualisation, DOF"
 
-    Quality renderings can be such as: subpixel sampling, Arnold renderer, v-ray renderer, C4D renderer, Unreal Engine, Blender renderer, DOF, environment mapping, etc.
+    lst = modifier_generator(init_prompt, modifier, examples)
 
-    Refer to the given examples, you need to generate 30 atmospheres for the theme of: {init_prompt}.
-
-    If the rendering has been mentioned in the initial prompt: {init_prompt}, your generation should be similar to the mentioned rendering.
-
-    Ensure your result is not limitted by the given examples.
-
-    Following the rules above, list only the rendering keywords as follows:
-    1. <rendering1>
-    2. <rendering2>
-    ...
-    30. <rendering30>
-
-    """
-
-    list = []
-    while len(list) != 30:
-        response = get_completion(prompt)
-        list = text2list(response)
-
-    return list
+    return lst
 
 def list2str(prompt_l, midorniji=''):
 
@@ -289,7 +173,7 @@ def list2str(prompt_l, midorniji=''):
     
     return prompt
 
-def generate(init_prompt, n=10):
+def generate(init_prompt, n=5):
     
     subject_list = subject(init_prompt)
     visual_art_style_list = visual_art_style(init_prompt)
