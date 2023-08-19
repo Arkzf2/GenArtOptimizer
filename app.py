@@ -214,9 +214,8 @@ if np.size(st.session_state.prompts) > 0:
                     color_rate = st.slider('rate the color', min_value=0, max_value=10, value=5, key=f"slider_color_{st.session_state.round_count}_{i}")
                     angle_rate = st.slider('rate the angle', min_value=0, max_value=10, value=5, key=f"slider_angle_{st.session_state.round_count}_{i}")
                     light_rate = st.slider('rate the light', min_value=0, max_value=10, value=5, key=f"slider_light_{st.session_state.round_count}_{i}")
-                    renderer_rate = st.slider('rate the renderer', min_value=0, max_value=10, value=5, key=f"slider_renderer_{st.session_state.round_count}_{i}")
-                    
-                    st.session_state.scores = [subject_rate, style_rate, color_rate, angle_rate, light_rate, renderer_rate]
+
+                    st.session_state.scores = [subject_rate, style_rate, color_rate, angle_rate, light_rate]
         
         # submit button
         submit_button = st.form_submit_button(label='Submit for Next Generation')
