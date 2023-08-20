@@ -222,11 +222,11 @@ def cross(prompt_A, prompt_B):
 def genetic(prompt_A, prompt_B, rate_list, keyword_mat, mutate_rate):
     m = 0.2
     if mutate_rate == 'high':
-        m = 0.1
+        m = 0.25
     elif mutate_rate == 'medium':
-        m = 0.15
-    elif mutate_rate == 'low':
         m = 0.3
+    elif mutate_rate == 'low':
+        m = 0.35
 
     prompt_list = []
 
