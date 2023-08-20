@@ -8,7 +8,7 @@ import json
 
 openai.api_key = os.getenv('OPENAI_API_KEY')
 
-def get_completion(prompt, model='gpt-3.5-turbo'):
+def get_completion(prompt, temperature=1.0):
     messages = [{'role': 'user', 'content': prompt}]
     
     max_retries = 5
@@ -17,9 +17,9 @@ def get_completion(prompt, model='gpt-3.5-turbo'):
     for i in range(max_retries):
         try:
             response = openai.ChatCompletion.create(
-                model=model,
+                model="gpt-3.5-turbo",
                 messages=messages,
-                temperature=1.0,
+                temperature=temperature,
             )
             return response['choices'][0]['message']['content']
 
