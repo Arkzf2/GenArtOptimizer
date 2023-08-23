@@ -8,9 +8,9 @@ import json
 
 openai.api_key = os.getenv('OPENAI_API_KEY')
 
-def get_completion(prompt, temperature=1.0):
+def get_completion(prompt, temperature=0.8):
     messages = [{'role': 'user', 'content': prompt}]
-    
+
     max_retries = 5
     retry_delay = 10
 
@@ -220,13 +220,17 @@ def cross(prompt_A, prompt_B):
     return prompt_child
 
 def genetic(prompt_A, prompt_B, rate_list, keyword_mat, mutate_rate):
-    m = 0.2
+    m = 0.3
     if mutate_rate == 'high':
         m = 0.25
     elif mutate_rate == 'medium':
         m = 0.3
     elif mutate_rate == 'low':
         m = 0.35
+    elif mutate_rate == 'super high':
+        m = 0.1
+    elif mutate_rate == 'super low':
+        m = 0.6
 
     prompt_list = []
 
