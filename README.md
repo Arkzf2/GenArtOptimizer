@@ -15,7 +15,7 @@ Please note that an active internet connection is still required for its operati
 
 For local deployment, it is imperative to configure two environment variables: OPENAI_API_KEY for the OpenAI API and MJ_API_KEY for the Midjourney API, provided by The Next Leg (https://www.thenextleg.io/). Ensure these are set in advance.
 
-![Alt text](1692868276126.png)
+![Alt text](key.png)
 ## Plz email me if the API key is NO LONGER AVAILABLE (ucapfz0@ucl.ac.uk). ##
 
 ### Workflow of Genjourney
