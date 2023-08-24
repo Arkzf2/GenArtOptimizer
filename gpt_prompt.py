@@ -102,7 +102,7 @@ def visual_art_style(init_prompt):
 
     modifier = "visual art style"
 
-    examples = "cyberpunk, futuristic, Rococo, ink painting, 1900s anime, Pixar, surrealism, Chinese painting, Renaissance style, minimalist style, graffiti style, gothic style, Fauvism, 3d, cinematic, photorealistic, industrial, architectural sketching"
+    examples = "Cyberpunk, Rococo, Futuristic, Glitch Art, Anime, Ukiyo-e, Ink painting, Minimalist, Photoreal, Pixar, etc."
 
     lst = modifier_generator(init_prompt, modifier, examples)
 
@@ -112,7 +112,7 @@ def artist_style(init_prompt):
 
     modifier = "artist"
 
-    examples = "Junji Ito, H.R. Ford, Jhon Berkey, Studio Ghibli, Alphonso Mucha, Yoneyama Mai, Krenz Cushart, Sandra Chevrier, Van Gogh, Guanzhong Wu, Baishi Qi, Sam Toft, WLOP"
+    examples = "Van Gogh, Wu Guanzhong, Alphonse Mucha, Rose Tran, Jon Klassen, WLOP, Miyazaki Hayao, Jeffrey Catherine Jones, Charlie Bowater, etc."
 
     lst = modifier_generator(init_prompt, modifier, examples)
 
@@ -122,7 +122,7 @@ def color_style(init_prompt):
 
     modifier = "color"
 
-    examples = "Macarons, Muted tones, black and white, laser candy paper color, maple red, neon shades, ivory white, red and black tones, rose gold, crystal blue"
+    examples = "Mint Green, Pop Art, Macarons, Black and White, Soft Pink, Crystal blue, Neon Shades, Muted Tones, Maple Red, Rich Color, etc."
 
     lst = modifier_generator(init_prompt, modifier, examples)
 
@@ -132,7 +132,7 @@ def perspective_style(init_prompt):
 
     modifier = "composition perspective"
 
-    examples = "close-up, panoramic view, simulated cemera, faceshot, full body, perspective, datail shot, side perspective, three views, product view, top-down perspective, fisheyelens, macrolens"
+    examples = "Depth of Field (DOF), Long Shots, Close-up, Dynamic Symmetry, Cinematic Shot, Wide-angle view, Bird View, Golden Ratio, S-shaped Composition, Fisheye Lens, etc."
 
     lst = modifier_generator(init_prompt, modifier, examples)
 
@@ -142,7 +142,7 @@ def light_style(init_prompt):
 
     modifier = "lighting effect"
 
-    examples = "cinematic light, intense backlight, soft lighting, soft moon light, studio lighting, crepuscular ray, volumetric lighting, front lighting, hard lighting, rainbow halo, glow in the dark, rim lighting"
+    examples = "Intense Backlight, Soft Lighting, Soft Moon Light, Studio Lighting, Crepuscular Ray, Volumetric Lighting, Front Lighting, Hard Lighting, Rainbow Halo, Glow in the Dark, etc."
 
     lst = modifier_generator(init_prompt, modifier, examples)
 
@@ -152,7 +152,7 @@ def rendering_style(init_prompt):
 
     modifier = "rendering quality"
 
-    examples = "subpixel sampling, Arnold renderer, V-ray renderer, C4D renderer, Unreal Engine, Blender renderer, 4k, 3DCG, Octane renderer, architectural visualisation, DOF"
+    examples = "Subpixel Sampling, Arnold Renderer, V-ray Renderer, C4D renderer, Unreal Engine, Blender renderer, 4k, 3DCG, Octane Renderer, Architectural Visualization, etc."
 
     lst = modifier_generator(init_prompt, modifier, examples)
 
